@@ -1,4 +1,4 @@
-module github.com/SWAN-community/config-store-go
+module github.com/SWAN-community/config-go
 
 go 1.17
 
