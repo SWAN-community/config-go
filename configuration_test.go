@@ -60,7 +60,7 @@ func TestCamelConvertMultiple(t *testing.T) {
 
 func TestLocalConfigurationSettings(t *testing.T) {
 	c := Override{}
-	err := LoadConfig([]string{"."}, "appsettings.test.local", &c)
+	err := LoadConfig([]string{"."}, "appsettings.test.local.json", &c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,7 +74,7 @@ func TestLocalConfigurationEnvironment(t *testing.T) {
 	e := "TEST ENV LOCAL FILE"
 	t.Setenv("LOCAL_FILE", e)
 	c := Override{}
-	err := LoadConfig([]string{"."}, "appsettings.test.local", &c)
+	err := LoadConfig([]string{"."}, "appsettings.test.local.json", &c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -95,7 +95,7 @@ func TestAwsConfigurationSettingsFalse(t *testing.T) {
 func testAwsConfigurationSettings(t *testing.T, expected bool) {
 	e := fmt.Sprintf("%t", expected)
 	c := Override{}
-	err := LoadConfig([]string{"."}, "appsettings.test.aws."+e, &c)
+	err := LoadConfig([]string{"."}, "appsettings.test.aws."+e+".json", &c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -117,7 +117,7 @@ func testAwsConfigurationEnvironment(t *testing.T, expected bool) {
 	e := fmt.Sprintf("%t", expected)
 	t.Setenv("AWS_ENABLED", e)
 	c := Override{}
-	err := LoadConfig([]string{"."}, "appsettings.test.none", &c)
+	err := LoadConfig([]string{"."}, "appsettings.test.none.json", &c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -129,7 +129,7 @@ func testAwsConfigurationEnvironment(t *testing.T, expected bool) {
 
 func TestGcpConfigurationSettings(t *testing.T) {
 	c := Override{}
-	err := LoadConfig([]string{"."}, "appsettings.test.gcp", &c)
+	err := LoadConfig([]string{"."}, "appsettings.test.gcp.json", &c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -143,7 +143,7 @@ func TestGcpConfigurationEnvironment(t *testing.T) {
 	e := "PROJECT NAME"
 	t.Setenv("GCP_PROJECT", e)
 	c := Override{}
-	err := LoadConfig([]string{"."}, "appsettings.test.none", &c)
+	err := LoadConfig([]string{"."}, "appsettings.test.none.json", &c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -155,7 +155,7 @@ func TestGcpConfigurationEnvironment(t *testing.T) {
 
 func TestAzureConfigurationSettings(t *testing.T) {
 	c := Override{}
-	err := LoadConfig([]string{"."}, "appsettings.test.azure", &c)
+	err := LoadConfig([]string{"."}, "appsettings.test.azure.json", &c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -171,7 +171,7 @@ func TestAzureConfigurationEnvironment(t *testing.T) {
 	t.Setenv("AZURE_STORAGE_ACCOUNT", ea)
 	t.Setenv("AZURE_STORAGE_ACCESS_KEY", ek)
 	c := Override{}
-	err := LoadConfig([]string{"."}, "appsettings.test.none", &c)
+	err := LoadConfig([]string{"."}, "appsettings.test.none.json", &c)
 	if err != nil {
 		t.Fatal(err)
 	}

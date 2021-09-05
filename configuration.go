@@ -29,8 +29,9 @@ import (
 // match the interface field names.
 //
 // paths is an array of directories to look for configuration files.
-// name is the name of the configuration file without an extension. The source
-// file must have the extension json.
+// fileName is the name of the configuration file. The extension must be a type
+// supported by the viper package (JSON, TOML, YAML, HCL, envfile and Java
+// properties config).
 // i is an instance of an interface to be populated from the files and
 // environment variables identified.
 //
@@ -40,13 +41,12 @@ import (
 // SERVICE_PATH.
 // The interface that is being used for the configuration needs to be consulted
 // because viper passes an upper case version of the field name into the method.
-func LoadConfig(paths []string, name string, i interface{}) error {
+func LoadConfig(paths []string, fileName string, i interface{}) error {
 	v := viper.New()
 	for _, path := range paths {
 		v.AddConfigPath(path)
 	}
-	v.SetConfigName(name)
-	v.SetConfigType("json")
+	v.SetConfigFile(fileName)
 	v.AutomaticEnv()
 	v.AllowEmptyEnv(false)
 	for _, n := range getFields(reflect.TypeOf(i).Elem()) {
