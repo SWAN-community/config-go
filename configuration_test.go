@@ -22,7 +22,7 @@ import (
 )
 
 type Override struct {
-	Common
+	Common    `mapstructure:",squash"`
 	LocalFile string `mapstructure:"localFile"`
 }
 
@@ -94,7 +94,7 @@ func TestAwsConfigurationSettingsFalse(t *testing.T) {
 
 func testAwsConfigurationSettings(t *testing.T, expected bool) {
 	e := fmt.Sprintf("%t", expected)
-	c := Common{}
+	c := Override{}
 	err := LoadConfig([]string{"."}, "appsettings.test.aws."+e, &c)
 	if err != nil {
 		t.Fatal(err)
@@ -116,7 +116,7 @@ func TestAwsConfigurationEnvironmentFalse(t *testing.T) {
 func testAwsConfigurationEnvironment(t *testing.T, expected bool) {
 	e := fmt.Sprintf("%t", expected)
 	t.Setenv("AWS_ENABLED", e)
-	c := Common{}
+	c := Override{}
 	err := LoadConfig([]string{"."}, "appsettings.test.none", &c)
 	if err != nil {
 		t.Fatal(err)
@@ -128,7 +128,7 @@ func testAwsConfigurationEnvironment(t *testing.T, expected bool) {
 }
 
 func TestGcpConfigurationSettings(t *testing.T) {
-	c := Common{}
+	c := Override{}
 	err := LoadConfig([]string{"."}, "appsettings.test.gcp", &c)
 	if err != nil {
 		t.Fatal(err)
@@ -142,7 +142,7 @@ func TestGcpConfigurationSettings(t *testing.T) {
 func TestGcpConfigurationEnvironment(t *testing.T) {
 	e := "PROJECT NAME"
 	t.Setenv("GCP_PROJECT", e)
-	c := Common{}
+	c := Override{}
 	err := LoadConfig([]string{"."}, "appsettings.test.none", &c)
 	if err != nil {
 		t.Fatal(err)
@@ -154,7 +154,7 @@ func TestGcpConfigurationEnvironment(t *testing.T) {
 }
 
 func TestAzureConfigurationSettings(t *testing.T) {
-	c := Common{}
+	c := Override{}
 	err := LoadConfig([]string{"."}, "appsettings.test.azure", &c)
 	if err != nil {
 		t.Fatal(err)
@@ -170,7 +170,7 @@ func TestAzureConfigurationEnvironment(t *testing.T) {
 	ek := "KEY"
 	t.Setenv("AZURE_STORAGE_ACCOUNT", ea)
 	t.Setenv("AZURE_STORAGE_ACCESS_KEY", ek)
-	c := Common{}
+	c := Override{}
 	err := LoadConfig([]string{"."}, "appsettings.test.none", &c)
 	if err != nil {
 		t.Fatal(err)
