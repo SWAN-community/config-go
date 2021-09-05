@@ -1,5 +1,5 @@
 /* ****************************************************************************
- * Copyright 2020 51 Degrees Mobile Experts Limited (51degrees.com)
+ * Copyright 2021 51 Degrees Mobile Experts Limited (51degrees.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -14,69 +14,77 @@
  * under the License.
  * ***************************************************************************/
 
-package configstore
+package config
 
 import (
-	"encoding/json"
-	"fmt"
-	"os"
 	"reflect"
+	"strings"
+	"unicode"
+
+	"github.com/spf13/viper"
 )
 
-// Configuration details from appsettings.json for access to the AWS, GCP, Azure
-// or local file storage.
-type Configuration struct {
-	AzureStorageAccount   string `json:"azureStorageAccount"`
-	AzureStorageAccessKey string `json:"azureStorageAccessKey"`
-	GcpProject            string `json:"gcpProject"`
-	OwidFile              string `json:"owidFile"`
-	AwsEnabled            string `json:"awsEnabled"`
-	OwidStore             string `json:"owidStore"`
-}
-
-// NewConfig creates a new instance of configuration from the file provided. If
-// the file does not contain a value for some important fields then the
-// environment is checked to see if there is corresponding value present there.
-func NewConfig(file string) Configuration {
-	var c Configuration
-	configFile, err := os.Open(file)
-	if err != nil {
-		fmt.Println(err.Error())
-	} else {
-		defer configFile.Close()
-		json.NewDecoder(configFile).Decode(&c)
-		c.setFromEnvironment("AZURE_STORAGE_ACCOUNT", "AzureStorageAccount")
-		c.setFromEnvironment("AZURE_STORAGE_ACCESS_KEY", "AzureStorageAccessKey")
-		c.setFromEnvironment("GCP_PROJECT", "GcpProject")
-		c.setFromEnvironment("OWID_FILE", "OwidFile")
-		c.setFromEnvironment("AWS_ENABLED", "AwsEnabled")
-		c.setFromEnvironment("OWID_STORE", "OwidStore")
+// LoadConfig populates the fields of interface i with the values from json
+// configuration files in the paths provided and from environment variables that
+// match the interface field names.
+//
+// paths is an array of directories to look for configuration files.
+// name is the name of the configuration file without an extension. The source
+// file must have the extension json.
+// i is an instance of an interface to be populated from the files and
+// environment variables identified.
+//
+// The method converts camel case field names to environment variables inserting
+// an underscore before upper case characters and outputing all characters as
+// uppercase. For example; the camel case field name ServicePath would become
+// SERVICE_PATH.
+// The interface that is being used for the configuration needs to be consulted
+// because viper passes an upper case version of the field name into the method.
+func LoadConfig(paths []string, name string, i interface{}) error {
+	v := viper.New()
+	for _, path := range paths {
+		v.AddConfigPath(path)
 	}
-	return c
-}
-
-// SetConfig used to add the values from the file to the existing configuration
-// instance.
-func SetConfig(file string, config *Configuration) {
-	f := NewConfig(file)
-	config.AwsEnabled = f.AwsEnabled
-	config.AzureStorageAccessKey = f.AzureStorageAccessKey
-	config.AzureStorageAccount = f.AzureStorageAccount
-	config.AwsEnabled = f.AwsEnabled
-	config.GcpProject = f.GcpProject
-	config.OwidFile = f.OwidFile
-	config.OwidStore = f.OwidStore
-}
-
-// setFromEnvironment checks if the k field in the configuration has a value.
-// If it doesn't then it checks the environment variables to see if they have
-// a value for the key e. If so then that value is used in the configuration.
-func (c *Configuration) setFromEnvironment(e string, k string) {
-	v := reflect.ValueOf(c).Elem()
-	if v.FieldByName(k).String() == "" {
-		ev := os.Getenv(e)
-		if ev != "" {
-			v.FieldByName(k).SetString(ev)
+	v.SetConfigName(name)
+	v.SetConfigType("json")
+	v.AutomaticEnv()
+	v.AllowEmptyEnv(false)
+	for _, n := range getFields(reflect.TypeOf(i).Elem()) {
+		err := v.BindEnv(n, convert(n))
+		if err != nil {
+			return err
 		}
 	}
+	err := v.ReadInConfig()
+	if err != nil {
+		return err
+	}
+	return v.Unmarshal(i)
+}
+
+func convert(s string) string {
+	b := strings.Builder{}
+	for i, c := range s {
+		if unicode.IsUpper(c) {
+			if i != 0 {
+				b.WriteString("_")
+			}
+		}
+		b.WriteRune(unicode.ToUpper(c))
+	}
+	return b.String()
+}
+
+func getFields(t reflect.Type) []string {
+	a := []string{}
+	for i := 0; i < t.NumField(); i++ {
+		f := t.Field(i)
+		switch f.Type.Kind() {
+		case reflect.Struct:
+			a = append(a, getFields(f.Type)...)
+		default:
+			a = append(a, f.Name)
+		}
+	}
+	return a
 }
