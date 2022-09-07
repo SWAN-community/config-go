@@ -1,6 +1,6 @@
 module github.com/SWAN-community/config-go
 
-go 1.17
+go 1.19
 
 require github.com/spf13/viper v1.8.1
 

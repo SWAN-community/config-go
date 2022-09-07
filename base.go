@@ -18,9 +18,35 @@ package config
 
 // Configuration details from appsettings.json for access to the AWS, GCP, Azure
 // or local file storage.
-type Common struct {
+type Base struct {
 	AzureStorageAccount   string `mapstructure:"azureStorageAccount"`
 	AzureStorageAccessKey string `mapstructure:"azureStorageAccessKey"`
 	GcpProject            string `mapstructure:"gcpProject"`
 	AwsEnabled            bool   `mapstructure:"awsEnabled"`
+	Scheme                string `mapstructure:"scheme"` // Either https or http
+	Debug                 bool   `mapstructure:"debug"`  // True for debug logging
+	HttpPlatformPort      int    `mapstructure:"httpPlatformPort"`
+	HttpsPlatformPort     int    `mapstructure:"httpsPlatformPort"`
+	Port                  int    `mapstructure:"port"`
+}
+
+func (b *Base) GetPortHTTP() int {
+	var port int
+	if b.HttpPlatformPort != 0 {
+		// Get the port environment variable from Azure App Services.
+		port = b.HttpPlatformPort
+	} else if b.Port != 0 {
+		// Get the port environment variable from Amazon Web Services.
+		port = b.Port
+	}
+	return port
+}
+
+func (b *Base) GetPortHTTPS() int {
+	var port int
+	if b.HttpsPlatformPort != 0 {
+		// Get the port environment variable from Azure App Services.
+		port = b.HttpsPlatformPort
+	}
+	return port
 }

@@ -36,7 +36,7 @@ import (
 // environment variables identified.
 //
 // The method converts camel case field names to environment variables inserting
-// an underscore before upper case characters and outputing all characters as
+// an underscore before upper case characters and outputting all characters as
 // uppercase. For example; the camel case field name ServicePath would become
 // SERVICE_PATH.
 // The interface that is being used for the configuration needs to be consulted
